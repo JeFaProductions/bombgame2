@@ -3,31 +3,36 @@
 # Author: Fabian Meyer
 # Created On: 31 Jan 2019
 
-import sys
 import pygame
 
 pygame.init()
 
-size = width, height = 320, 240
-speed = [2, 2]
-black = (0, 0, 0)
+screen = pygame.display.set_mode((400, 300))
 
-screen = pygame.display.set_mode(size)
+done = False
+x = 30
+y = 30
+rect_color = (0, 128, 255)
 
-ball = pygame.image.load("ball.png")
-ballrect = ball.get_rect()
+clock = pygame.time.Clock()
 
-while True:
+while not done:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            sys.exit()
+                done = True
 
-    ballrect = ballrect.move(speed)
-    if ballrect.left < 0 or ballrect.right > width:
-        speed[0] = -speed[0]
-    if ballrect.top < 0 or ballrect.bottom > height:
-        speed[1] = -speed[1]
+    pressed = pygame.key.get_pressed()
+    if pressed[pygame.K_UP]:
+        y -= 3
+    if pressed[pygame.K_DOWN]:
+        y += 3
+    if pressed[pygame.K_LEFT]:
+        x -= 3
+    if pressed[pygame.K_RIGHT]:
+        x += 3
 
-    screen.fill(black)
-    screen.blit(ball, ballrect)
+    screen.fill((0, 0, 0))
+    pygame.draw.rect(screen, rect_color, pygame.Rect(x, y, 60, 60))
+
     pygame.display.flip()
+    clock.tick(60)

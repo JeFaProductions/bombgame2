@@ -10,7 +10,7 @@ class Tile:
     def __init__(self, size):
         self.size = size
         self.background_type = GRASS
-        self.blocks = False
+        self.blocked = False
         self.object = None
 
 

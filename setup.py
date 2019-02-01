@@ -12,5 +12,6 @@ setup(name='bombgame2',
     author=['Fabian Meyer', 'Jens Gansloser'],
     author_email='',
     packages=['bombgame'],
+    package_data={'bombgame': ['assets']},
     ext_modules=[],
     scripts=['bombgame2.py'])

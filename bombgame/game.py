@@ -6,8 +6,14 @@
 import pygame
 from . import tilemap
 from . import maze
+import sys
+import os.path
 
 def run():
+    root_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
+    stone_file = os.path.join(root_dir, 'bombgame/assets/stoneblock.png')
+    grass_file = os.path.join(root_dir, 'bombgame/assets/grass.png')
+
     pygame.init()
 
     # create pygame window
@@ -18,8 +24,8 @@ def run():
     maze.generate(map)
 
     # load assets
-    stoneblock_img = pygame.image.load('assets/stoneblock.png')
-    grass_img = pygame.image.load('assets/grass.png')
+    stoneblock_img = pygame.image.load(stone_file)
+    grass_img = pygame.image.load(grass_file)
 
     done = False
 

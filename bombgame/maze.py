@@ -1,16 +1,12 @@
 # maze.py
 
-from . import tilemap
-import random
+from .recursive_bt_maze import RecursiveBTMaze
 
 def generate(map):
     width, height = map.size
 
-    for y in range(height):
-        for x in range(width):
-            tile = map[x, y]
-            bgtype = random.randint(0, 1)
+    mazegen = RecursiveBTMaze(width, height)
+    mazegen.generate()
 
-            tile.background_type = bgtype
-            if bgtype == tilemap.STONEBLOCK:
-                tile.blocked = True
+    map.blocked[:, :] = mazegen.data == 1
+    map.background[:, :] = mazegen.data

@@ -24,8 +24,8 @@ def run():
     maze.generate(map)
 
     # load assets
-    stoneblock_img = pygame.image.load(stone_file)
-    grass_img = pygame.image.load(grass_file)
+    bg_sprites = [pygame.image.load(grass_file),
+        pygame.image.load(stone_file)]
 
     done = False
 
@@ -51,13 +51,10 @@ def run():
         twidth, theight = map.tileSize
         for y in range(height):
             for x in range(width):
-                tile = map[x, y]
+                bg = map.background[y, x]
                 real_pos = (x * twidth, y * theight)
-                rect = pygame.Rect(real_pos, tile.size)
-                if tile.background_type == tilemap.GRASS:
-                    screen.blit(grass_img, rect)
-                elif tile.background_type == tilemap.STONEBLOCK:
-                    screen.blit(stoneblock_img, rect)
+                rect = pygame.Rect(real_pos, (twidth, theight))
+                screen.blit(bg_sprites[bg], rect)
 
         pygame.display.flip()
         clock.tick(60)

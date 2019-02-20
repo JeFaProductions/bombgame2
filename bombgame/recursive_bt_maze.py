@@ -21,7 +21,7 @@ class RecursiveBTMaze:
         self.opposite = {'N': 'S', 'E': 'W', 'S': 'N', 'W': 'E'}
 
         # 0: path, 1: wall.
-        self.data = np.ones((width, height), dtype=np.int)
+        self.data = np.ones((height, width), dtype=np.int)
 
     def generate(self):
         index = np.array([random.randint(0, self.height - 1),

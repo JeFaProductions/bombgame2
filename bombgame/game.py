@@ -96,6 +96,9 @@ def run():
             timeAccount = 0
             game_logic.update(world)
 
+            for a in ais:
+                a.update(world)
+
         if screen is not None:
             game_rendering.render(screen, world, sprites)
 

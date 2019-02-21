@@ -65,6 +65,7 @@ class Bomb:
 class Player:
     def __init__(self, id, pos=(0, 0), lifes=1, kills=0, hits=0,
     max_bombs=5):
+        self.id = id
         self.pos = np.array(pos, dtype=np.int)
         self.lifes = lifes
         self.kills = kills

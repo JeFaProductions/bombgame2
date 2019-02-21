@@ -25,6 +25,7 @@ class Player:
         self.lifes = lifes
         self.kills = kills
         self.move = np.array((0, 0))
+        self.drop_bomb = False
 
     def is_dead(self):
         return self.lifes == 0

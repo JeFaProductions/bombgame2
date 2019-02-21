@@ -21,6 +21,16 @@ def process_human_input(human):
     elif pressed[pygame.K_RIGHT]:
         human.move[0] = 1
 
+    if pressed[pygame.K_SPACE]:
+        human.drop_bomb = True
+
+def place_bombs(players, bombs, map):
+    for player in players:
+        if player.drop_bomb:
+            bombs.append(objects.Bomb(pos=player.pos, owner=player))
+            map.blocked[player.pos[1], player.pos[0]] = True
+            player.drop_bomb = False
+
 def move_players(players, map):
     for player in players:
         new_pos = player.pos + player.move
@@ -39,6 +49,13 @@ def draw_tilemap(screen, map, tile_sprites):
             rect = pygame.Rect(real_pos, (twidth, theight))
             screen.blit(tile_sprites[bg], rect)
 
+def draw_bombs(screen, bombs, map, sprite):
+    twidth, theight = map.tileSize
+    for bomb in bombs:
+        real_pos = (bomb.pos[0] * twidth, bomb.pos[1] * theight)
+        rect = pygame.Rect(real_pos, (twidth, theight))
+        screen.blit(sprite, rect)
+
 def draw_players(screen, players, map, player_sprites):
     twidth, theight = map.tileSize
     for player, sprites in zip(players, player_sprites):
@@ -51,6 +68,7 @@ def run():
     stone_file = os.path.join(root_dir, 'bombgame/assets/stoneblock.png')
     grass_file = os.path.join(root_dir, 'bombgame/assets/grass.png')
     player_file = os.path.join(root_dir, 'bombgame/assets/player.png')
+    bomb_file = os.path.join(root_dir, 'bombgame/assets/bomb.png')
 
     pygame.init()
 
@@ -65,12 +83,14 @@ def run():
     bombs = []
     explosions = []
     human = players[0]
+    # ais = players[1:]
 
     # load assets
     tile_sprites = [pygame.image.load(grass_file),
         pygame.image.load(stone_file)]
     sprite = pygame.image.load(player_file)
     player_sprites = [[sprite] for _ in players]
+    bomb_sprite = pygame.image.load(bomb_file)
 
     done = False
 
@@ -81,11 +101,13 @@ def run():
                     done = True
 
         process_human_input(human)
+        place_bombs(players, bombs, map)
         move_players(players, map)
 
         screen.fill((0, 0, 0))
 
         draw_tilemap(screen, map, tile_sprites)
+        draw_bombs(screen, bombs, map, bomb_sprite)
         draw_players(screen, players, map, player_sprites)
 
         pygame.display.flip()

@@ -26,7 +26,6 @@ def place_bombs(players, bombs, map):
             # a bomb blocks a tile
             map.set_blocked(bomb.pos, True)
             # disable bomb flag and increment count
-            player.drop_bomb = False
             player.bomb_count += 1
 
 def move_players(players, map):

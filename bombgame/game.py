@@ -21,6 +21,7 @@ def process_human_input(human):
     elif pressed[pygame.K_RIGHT]:
         human.move[0] = 1
 
+    human.drop_bomb = False
     if pressed[pygame.K_SPACE]:
         human.drop_bomb = True
 

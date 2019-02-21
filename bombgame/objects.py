@@ -13,6 +13,12 @@ class TileMap:
         self.background = np.zeros((height, width), dtype=np.int)
         self.blocked = self.background == 0
 
+class Explosion:
+    def __init(self, pos=np.array((0, 0)), time=10, owner=None):
+        self.pos = pos
+        self.time = time
+        self.owner = owner
+
 class Bomb:
     def __init__(self, pos=np.array((0, 0)), time=10, owner=None):
         self.pos = pos
@@ -20,12 +26,16 @@ class Bomb:
         self.owner = owner
 
 class Player:
-    def __init__(self, pos=np.array((0, 0)), lifes=1, kills=0):
+    def __init__(self, pos=np.array((0, 0)), lifes=1, kills=0, hits=0,
+    max_bombs=5):
         self.pos = pos
         self.lifes = lifes
         self.kills = kills
+        self.hits = hits
         self.move = np.array((0, 0))
         self.drop_bomb = False
+        self.bomb_count = 0
+        self.max_bombs = max_bombs
 
     def is_dead(self):
         return self.lifes == 0

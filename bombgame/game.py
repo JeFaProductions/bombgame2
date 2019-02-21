@@ -26,10 +26,11 @@ def process_human_input(human):
 
 def place_bombs(players, bombs, map):
     for player in players:
-        if player.drop_bomb:
+        if player.drop_bomb and player.bomb_count < player.max_bombs:
             bombs.append(objects.Bomb(pos=player.pos, owner=player))
             map.blocked[player.pos[1], player.pos[0]] = True
             player.drop_bomb = False
+            player.bomb_count += 1
 
 def move_players(players, map):
     for player in players:
@@ -38,6 +39,20 @@ def move_players(players, map):
            new_pos[1] >= 0 and new_pos[1] < map.size[1] and \
            not map.blocked[new_pos[1], new_pos[0]]:
             player.pos = new_pos
+
+def update_bombs(bombs, map, explosions):
+    to_remove = []
+    for i, bomb in enumerate(bombs):
+        if bomb.time == 0:
+            to_remove.append(i)
+            map.blocked[bomb.pos[1], bomb.pos[0]] = False
+            bomb.owner.bomb_count -= 1
+        else:
+            bomb.time -= 1
+
+    to_remove.reverse()
+    for i in to_remove:
+        del bombs[i]
 
 def draw_tilemap(screen, map, tile_sprites):
     width, height = map.size
@@ -64,11 +79,11 @@ def draw_players(screen, players, map, player_sprites):
         screen.blit(sprites[0], rect)
 
 def run():
-    root_dir = os.path.dirname(os.path.realpath(sys.argv[0]))
-    stone_file = os.path.join(root_dir, 'bombgame/assets/stoneblock.png')
-    grass_file = os.path.join(root_dir, 'bombgame/assets/grass.png')
-    player_file = os.path.join(root_dir, 'bombgame/assets/player.png')
-    bomb_file = os.path.join(root_dir, 'bombgame/assets/bomb.png')
+    root_dir = os.path.dirname(os.path.realpath(__file__))
+    stone_file = os.path.join(root_dir, 'assets/stoneblock.png')
+    grass_file = os.path.join(root_dir, 'assets/grass.png')
+    player_file = os.path.join(root_dir, 'assets/player.png')
+    bomb_file = os.path.join(root_dir, 'assets/bomb.png')
 
     pygame.init()
 
@@ -95,14 +110,18 @@ def run():
     done = False
 
     clock = pygame.time.Clock()
+    timeAccount = 0
     while not done:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                     done = True
 
         process_human_input(human)
-        place_bombs(players, bombs, map)
-        move_players(players, map)
+        if timeAccount >= 100:
+            timeAccount = 0
+            place_bombs(players, bombs, map)
+            move_players(players, map)
+            update_bombs(bombs, map, explosions)
 
         screen.fill((0, 0, 0))
 
@@ -111,4 +130,4 @@ def run():
         draw_players(screen, players, map, player_sprites)
 
         pygame.display.flip()
-        clock.tick(10)
+        timeAccount += clock.tick(60)

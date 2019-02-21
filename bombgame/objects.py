@@ -5,25 +5,62 @@
 
 import numpy as np
 
+class Grid:
+    def __init__(self, size, value=None):
+        self.size = size
+        self.data = [None for _ in range(size[0] * size[1])]
+
+    def __getitem__(self, idx):
+        x, y = idx
+        idx = y * self.size[0] + x
+        return self.data[idx]
+
+    def __setitem__(self, idx, value):
+        x, y = idx
+        idx = y * self.size[0] + x
+        self.data[idx] = value
+
 class TileMap:
     def __init__(self, size, tileSize):
         self.size = size
         self.tileSize = tileSize
         width, height = size
-        self.background = np.zeros((height, width), dtype=np.int)
+        self.background = np.zeros((width, height), dtype=np.int)
         self.blocked = self.background == 0
+        self.explosions = Grid(size)
+
+    def is_valid(self, pos):
+        return pos[0] >= 0 and pos[0] < self.size[0] and\
+            pos[1] >= 0 and pos[1] < self.size[1]
+
+    def is_blocked(self, pos):
+        return self.blocked[pos[0], pos[1]]
+
+    def set_blocked(self, pos, value):
+        self.blocked[pos[0], pos[1]] = value
+
+    def has_explosion(self, pos):
+        return self.get_explosion(pos) is not None
+
+    def get_explosion(self, pos):
+        return self.explosions[pos[0], pos[1]]
+
+    def set_explosion(self, pos, value):
+        self.explosions[pos[0], pos[1]] = value
+
 
 class Explosion:
-    def __init(self, pos=np.array((0, 0)), time=10, owner=None):
+    def __init__(self, pos=np.array((0, 0)), time=10, owner=None):
         self.pos = pos
         self.time = time
         self.owner = owner
 
 class Bomb:
-    def __init__(self, pos=np.array((0, 0)), time=10, owner=None):
+    def __init__(self, pos=np.array((0, 0)), time=10, owner=None, range=3):
         self.pos = pos
         self.time = time
         self.owner = owner
+        self.range = range
 
 class Player:
     def __init__(self, pos=np.array((0, 0)), lifes=1, kills=0, hits=0,

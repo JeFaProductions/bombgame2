@@ -6,8 +6,8 @@
 import pygame
 from . import objects
 from . import maze
-import sys
 import os.path
+import numpy as np
 
 def process_human_input(human):
     human.move[:] = 0
@@ -28,55 +28,81 @@ def place_bombs(players, bombs, map):
     for player in players:
         if player.drop_bomb and player.bomb_count < player.max_bombs:
             bombs.append(objects.Bomb(pos=player.pos, owner=player))
-            map.blocked[player.pos[1], player.pos[0]] = True
+            map.set_blocked(player.pos, True)
             player.drop_bomb = False
             player.bomb_count += 1
 
 def move_players(players, map):
     for player in players:
         new_pos = player.pos + player.move
-        if new_pos[0] >= 0 and new_pos[0] < map.size[0] and \
-           new_pos[1] >= 0 and new_pos[1] < map.size[1] and \
-           not map.blocked[new_pos[1], new_pos[0]]:
+        if map.is_valid(new_pos) and not map.is_blocked(new_pos):
             player.pos = new_pos
 
 def update_bombs(bombs, map, explosions):
-    to_remove = []
+    exploded = []
     for i, bomb in enumerate(bombs):
         if bomb.time == 0:
-            to_remove.append(i)
-            map.blocked[bomb.pos[1], bomb.pos[0]] = False
+            exploded.append(i)
+            map.set_blocked(bomb.pos, False)
             bomb.owner.bomb_count -= 1
         else:
             bomb.time -= 1
 
+    exploded.reverse()
+    for i in exploded:
+        pos = bombs[i].pos
+        bomb_range = bombs[i].range
+        owner = bombs[i].owner
+
+        explosions.append(objects.Explosion(pos=pos, owner=owner))
+        map.set_explosion(pos, explosions[-1])
+
+        directions = np.array([(1, 0), (-1, 0), (0, 1), (0, -1)])
+        for dir in directions:
+            for delta in range(1, bomb_range):
+                npos = pos + dir * delta
+
+                if not map.is_valid(npos) or map.is_blocked(npos) or \
+                   map.has_explosion(npos):
+                    break
+
+                explosions.append(objects.Explosion(pos=npos, owner=owner))
+                map.set_explosion(npos, explosions[-1])
+
+        del bombs[i]
+
+def update_explosions(explosions, map):
+    to_remove = []
+    for i, explosion in enumerate(explosions):
+        if explosion.time == 0:
+            to_remove.append(i)
+            map.set_explosion(explosion.pos, None)
+        else:
+            explosion.time -= 1
+
     to_remove.reverse()
     for i in to_remove:
-        del bombs[i]
+        del explosions[i]
 
 def draw_tilemap(screen, map, tile_sprites):
     width, height = map.size
     twidth, theight = map.tileSize
     for y in range(height):
         for x in range(width):
-            bg = map.background[y, x]
+            bg = map.background[x, y]
             real_pos = (x * twidth, y * theight)
             rect = pygame.Rect(real_pos, (twidth, theight))
             screen.blit(tile_sprites[bg], rect)
 
-def draw_bombs(screen, bombs, map, sprite):
+def draw_objects(screen, objects, map, sprite):
     twidth, theight = map.tileSize
-    for bomb in bombs:
-        real_pos = (bomb.pos[0] * twidth, bomb.pos[1] * theight)
+    for obj in objects:
+        real_pos = (obj.pos[0] * twidth, obj.pos[1] * theight)
         rect = pygame.Rect(real_pos, (twidth, theight))
         screen.blit(sprite, rect)
 
 def draw_players(screen, players, map, player_sprites):
-    twidth, theight = map.tileSize
-    for player, sprites in zip(players, player_sprites):
-        real_pos = (player.pos[0] * twidth, player.pos[1] * theight)
-        rect = pygame.Rect(real_pos, (twidth, theight))
-        screen.blit(sprites[0], rect)
+    draw_objects(screen, players, map, player_sprites[0])
 
 def run():
     root_dir = os.path.dirname(os.path.realpath(__file__))
@@ -84,6 +110,7 @@ def run():
     grass_file = os.path.join(root_dir, 'assets/grass.png')
     player_file = os.path.join(root_dir, 'assets/player.png')
     bomb_file = os.path.join(root_dir, 'assets/bomb.png')
+    explosion_file = os.path.join(root_dir, 'assets/explosion.png')
 
     pygame.init()
 
@@ -101,11 +128,12 @@ def run():
     # ais = players[1:]
 
     # load assets
-    tile_sprites = [pygame.image.load(grass_file),
+    sprites = {}
+    sprites['tiles'] = [pygame.image.load(grass_file),
         pygame.image.load(stone_file)]
-    sprite = pygame.image.load(player_file)
-    player_sprites = [[sprite] for _ in players]
-    bomb_sprite = pygame.image.load(bomb_file)
+    sprites['player'] = [pygame.image.load(player_file)]
+    sprites['bomb'] = pygame.image.load(bomb_file)
+    sprites['explosion'] = pygame.image.load(explosion_file)
 
     done = False
 
@@ -121,13 +149,17 @@ def run():
             timeAccount = 0
             place_bombs(players, bombs, map)
             move_players(players, map)
+            update_explosions(explosions, map)
             update_bombs(bombs, map, explosions)
 
         screen.fill((0, 0, 0))
 
-        draw_tilemap(screen, map, tile_sprites)
-        draw_bombs(screen, bombs, map, bomb_sprite)
-        draw_players(screen, players, map, player_sprites)
+        draw_tilemap(screen, map, sprites['tiles'])
+        # draw explosions
+        draw_objects(screen, explosions, map, sprites['explosion'])
+        # draw bombs
+        draw_objects(screen, bombs, map, sprites['bomb'])
+        draw_players(screen, players, map, sprites['player'])
 
         pygame.display.flip()
         timeAccount += clock.tick(60)

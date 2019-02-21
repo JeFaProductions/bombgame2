@@ -15,4 +15,4 @@ setup(name='bombgame2',
     package_data={'bombgame': ['assets/*.png']},
     ext_modules=[],
     scripts=['bombgame2'],
-    requires=['numpy', 'pygame'])
+    install_requires=['numpy', 'pygame'])

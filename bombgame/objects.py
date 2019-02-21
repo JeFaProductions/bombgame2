@@ -50,29 +50,36 @@ class TileMap:
 
 
 class Explosion:
-    def __init__(self, pos=np.array((0, 0)), time=10, owner=None):
-        self.pos = pos
+    def __init__(self, pos=(0, 0), time=10, owner=None):
+        self.pos = np.array(pos, dtype=np.int)
         self.time = time
         self.owner = owner
 
 class Bomb:
-    def __init__(self, pos=np.array((0, 0)), time=10, owner=None, range=3):
-        self.pos = pos
+    def __init__(self, pos=(0, 0), time=10, owner=None, range=3):
+        self.pos = np.array(pos, dtype=np.int)
         self.time = time
         self.owner = owner
         self.range = range
 
 class Player:
-    def __init__(self, pos=np.array((0, 0)), lifes=1, kills=0, hits=0,
+    def __init__(self, id, pos=(0, 0), lifes=1, kills=0, hits=0,
     max_bombs=5):
-        self.pos = pos
+        self.pos = np.array(pos, dtype=np.int)
         self.lifes = lifes
         self.kills = kills
         self.hits = hits
-        self.move = np.array((0, 0))
+        self.move = np.array((0, 0), dtype=np.int)
         self.drop_bomb = False
         self.bomb_count = 0
         self.max_bombs = max_bombs
 
     def is_dead(self):
         return self.lifes == 0
+
+class World:
+    def __init__(self):
+        self.map = None
+        self.bombs = []
+        self.players = []
+        self.explosions = []

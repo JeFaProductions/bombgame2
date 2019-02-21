@@ -6,13 +6,12 @@
 import numpy as np
 from . import objects
 
-def update(map, players, bombs, explosions):
-    place_bombs(players, bombs, map)
-    move_players(players, map)
-    update_explosions(explosions, map)
-    update_bombs(bombs, map, explosions)
-    process_hits(players, map)
-
+def update(world):
+    place_bombs(world.players, world.bombs, world.map)
+    move_players(world.players, world.map)
+    update_explosions(world.explosions, world.map)
+    update_bombs(world.bombs, world.map, world.explosions)
+    process_hits(world.players, world.map)
 
 def place_bombs(players, bombs, map):
     for player in players:

@@ -7,7 +7,10 @@ import pygame
 from . import objects
 from . import maze
 from . import game_logic
+from . import game_rendering
+from . import ai
 import os.path
+import numpy as np
 
 def process_human_input(human):
     human.move[:] = 0
@@ -25,25 +28,25 @@ def process_human_input(human):
     if pressed[pygame.K_SPACE]:
         human.drop_bomb = True
 
-def draw_tilemap(screen, map, tile_sprites):
-    width, height = map.size
-    twidth, theight = map.tileSize
-    for y in range(height):
-        for x in range(width):
-            bg = map.background[x, y]
-            real_pos = (x * twidth, y * theight)
-            rect = pygame.Rect(real_pos, (twidth, theight))
-            screen.blit(tile_sprites[bg], rect)
+def find_spawn_point(start, player, map):
+    player.pos = np.array(start, dtype=np.int)
+    points = [(start[0], start[1])]
+    visited = {}
+    found = False
+    while not found and points:
+        point = points[0]
+        points = points[1:]
+        visited[point] = True
 
-def draw_objects(screen, objects, map, sprite):
-    twidth, theight = map.tileSize
-    for obj in objects:
-        real_pos = (obj.pos[0] * twidth, obj.pos[1] * theight)
-        rect = pygame.Rect(real_pos, (twidth, theight))
-        screen.blit(sprite, rect)
-
-def draw_players(screen, players, map, player_sprites):
-    draw_objects(screen, players, map, player_sprites[0])
+        if not map.is_blocked(point):
+            found = True
+            player.pos = point
+        else:
+            neighs = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+            for n in neighs:
+                npos = (point[0] + n[0], point[1] + n[1])
+                if npos not in visited and map.is_valid(npos):
+                    points.append(npos)
 
 def run():
     root_dir = os.path.dirname(os.path.realpath(__file__))
@@ -59,14 +62,17 @@ def run():
     screen = pygame.display.set_mode((600, 600))
 
     # create tile map
-    map = objects.TileMap((20, 20), (30, 30))
-    maze.generate(map)
+    world = objects.World()
+    world.map = objects.TileMap((20, 20), (30, 30))
+    maze.generate(world.map)
 
-    players = [objects.Player()]
-    bombs = []
-    explosions = []
-    human = players[0]
-    # ais = players[1:]
+    world.players = [objects.Player(i) for i in range(2)]
+    find_spawn_point((0, 0), world.players[0], world.map)
+    find_spawn_point((0, world.map.size[1] - 1), world.players[1], world.map)
+    world.bombs = []
+    world.explosions = []
+    human = world.players[0]
+    ais = [ai.AI(p) for p in world.players[1:]]
 
     # load assets
     sprites = {}
@@ -88,16 +94,9 @@ def run():
         process_human_input(human)
         if timeAccount >= 100:
             timeAccount = 0
-            game_logic.update(map, players, bombs, explosions)
+            game_logic.update(world)
 
-        screen.fill((0, 0, 0))
+        if screen is not None:
+            game_rendering.render(screen, world, sprites)
 
-        draw_tilemap(screen, map, sprites['tiles'])
-        # draw explosions
-        draw_objects(screen, explosions, map, sprites['explosion'])
-        # draw bombs
-        draw_objects(screen, bombs, map, sprites['bomb'])
-        draw_players(screen, players, map, sprites['player'])
-
-        pygame.display.flip()
         timeAccount += clock.tick(60)

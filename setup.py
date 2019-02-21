@@ -14,5 +14,5 @@ setup(name='bombgame2',
     packages=['bombgame'],
     package_data={'bombgame': ['assets/*.png']},
     ext_modules=[],
-    scripts=['bombgame2.py'],
+    scripts=['bombgame2'],
     requires=['numpy', 'pygame'])

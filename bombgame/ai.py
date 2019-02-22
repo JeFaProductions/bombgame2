@@ -19,6 +19,7 @@ class AI:
         self.weight_crossroad = 6
 
     def update(self, world):
+        self.player.drop_bomb = False
         if self.state == SEARCH_TARGET:
             score = np.zeros(world.map.size)
             unblock = ~world.map.blocked

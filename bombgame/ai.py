@@ -15,8 +15,8 @@ class AI:
         self.path = []
         self.state = SEARCH_TARGET
         self.weight_self = 3
-        self.weight_enemy = 5
-        self.weight_crossroad = 6
+        self.weight_enemy = 6
+        self.weight_crossroad = 3
         self.map_positions = np.empty((0, 0))
         self.bomb_times = np.empty((0, 0))
 

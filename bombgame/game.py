@@ -12,6 +12,8 @@ from . import ai
 import os.path
 import numpy as np
 
+COLORS = [(255,0,0), (0,255,0), (0,0,255), (255,255,0), (0,255,255), (255,255,255)]
+
 def process_human_input(human):
     human.move[:] = 0
     pressed = pygame.key.get_pressed()
@@ -48,6 +50,19 @@ def find_spawn_point(start, player, map):
                 if npos not in visited and map.is_valid(npos):
                     points.append(npos)
 
+def recolor_players(sprite, player_cnt):
+    result = [sprite.copy() for _ in range(player_cnt)]
+    for i, img in enumerate(result):
+        tmp = pygame.surfarray.pixels3d(img)
+        tmp_mask = tmp == 255
+        tmp_mask = np.logical_and(tmp_mask[:, :, 0], tmp_mask[:, :, 2])
+
+        tmp[tmp_mask] = np.array(COLORS[i])
+
+        print(COLORS[i])
+
+    return result
+
 def run():
     root_dir = os.path.dirname(os.path.realpath(__file__))
     stone_file = os.path.join(root_dir, 'assets/stoneblock.png')
@@ -66,9 +81,11 @@ def run():
     world.map = objects.TileMap((20, 20), (30, 30))
     maze.generate(world.map)
 
-    world.players = [objects.Player(i) for i in range(2)]
+    world.players = [objects.Player(i) for i in range(4)]
     find_spawn_point((0, 0), world.players[0], world.map)
     find_spawn_point((0, world.map.size[1] - 1), world.players[1], world.map)
+    find_spawn_point((world.map.size[0] - 1, 0), world.players[2], world.map)
+    find_spawn_point((world.map.size[0] - 1, world.map.size[1] - 1), world.players[3], world.map)
     world.bombs = []
     world.explosions = []
     human = world.players[0]
@@ -78,7 +95,8 @@ def run():
     sprites = {}
     sprites['tiles'] = [pygame.image.load(grass_file),
         pygame.image.load(stone_file)]
-    sprites['player'] = [pygame.image.load(player_file)]
+    player_sprite = pygame.image.load(player_file)
+    sprites['player'] = recolor_players(player_sprite, len(world.players))
     sprites['bomb'] = pygame.image.load(bomb_file)
     sprites['explosion'] = pygame.image.load(explosion_file)
 

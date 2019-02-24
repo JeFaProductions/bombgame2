@@ -52,6 +52,7 @@ class AI:
 
     def update(self, world):
         self.player.drop_bomb = False
+        self.player.move[:] = 0
         if self.state == SEARCH_TARGET:
             # init score board, each tile gets a score the maximum is chosen as
             # target
@@ -120,7 +121,7 @@ class AI:
                 return world.map.is_valid(node) and \
                     not world.map.is_blocked(node) and \
                     not world.map.has_explosion(node) and \
-                    self.bomb_times[node[0], node[1]] - len(path) > 0
+                    self.bomb_times[node[0], node[1]] - len(path) - 1 > 0
 
             found = False
             iterations = 0

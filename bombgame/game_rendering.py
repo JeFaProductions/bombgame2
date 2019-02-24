@@ -34,5 +34,6 @@ def draw_objects(screen, objects, map, sprite):
         rect = pygame.Rect(real_pos, (twidth, theight))
         screen.blit(sprite, rect)
 
-def draw_players(screen, players, map, player_sprites):
-    draw_objects(screen, players, map, player_sprites[0])
+def draw_players(screen, players, map, sprites):
+    for p, s in zip(players, sprites):
+        draw_objects(screen, [p], map, s)

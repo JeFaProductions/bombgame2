@@ -30,6 +30,7 @@ def reconstruct_path(node, nodes):
     while node.came_from is not None:
         node = nodes[node.came_from]
         path.append(node.pos)
+    path = path[:-1]
     path.reverse()
 
     return path

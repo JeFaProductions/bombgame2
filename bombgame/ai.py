@@ -53,6 +53,20 @@ class AI:
     def update(self, world):
         self.player.drop_bomb = False
         self.player.move[:] = 0
+
+        if self.state == MOVE:
+            if self.path:
+                next_pos = self.path.pop(0)
+                if world.map.is_blocked(next_pos) or world.map.has_explosion(next_pos):
+                    self.path = []
+                    self.state = SEARCH_TARGET
+
+                next_pos = np.array(next_pos, dtype=np.int)
+                self.player.move = next_pos - self.player.pos
+            else:
+                self.player.drop_bomb = True
+                self.state = SEARCH_TARGET
+
         if self.state == SEARCH_TARGET:
             # init score board, each tile gets a score the maximum is chosen as
             # target
@@ -141,11 +155,3 @@ class AI:
 
             if not found:
                 print('No path found!')
-        elif self.state == MOVE:
-            if self.path:
-                next_pos = self.path.pop(0)
-                next_pos = np.array(next_pos, dtype=np.int)
-                self.player.move = next_pos - self.player.pos
-            else:
-                self.player.drop_bomb = True
-                self.state = SEARCH_TARGET

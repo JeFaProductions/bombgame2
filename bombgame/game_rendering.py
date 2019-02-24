@@ -35,5 +35,5 @@ def draw_objects(screen, objects, map, sprite):
         screen.blit(sprite, rect)
 
 def draw_players(screen, players, map, sprites):
-    for p, s in zip(players, sprites):
-        draw_objects(screen, [p], map, s)
+    for p in players:
+        draw_objects(screen, [p], map, sprites[p.id])

@@ -12,7 +12,8 @@ from . import ai
 import os.path
 import numpy as np
 
-COLORS = [(255,0,0), (0,255,0), (0,0,255), (255,255,0), (0,255,255), (255,255,255)]
+COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0),
+    (0, 255, 255), (255, 0, 255), (255, 255, 255), (0, 0, 0)]
 
 def process_human_input(human):
     human.move[:] = 0
@@ -29,6 +30,13 @@ def process_human_input(human):
     human.drop_bomb = False
     if pressed[pygame.K_SPACE]:
         human.drop_bomb = True
+
+def spawn_points(map):
+    width, height = map.size
+    return [(0, 0), (width - 1, 0),
+        (0, height - 1), (width - 1, height - 1),
+        (0, int(height / 2)), (int(width / 2), 0),
+        (width - 1, int(height / 2)), (int(width / 2), height - 1)]
 
 def find_spawn_point(start, player, map):
     player.pos = np.array(start, dtype=np.int)
@@ -59,8 +67,6 @@ def recolor_players(sprite, player_cnt):
 
         tmp[tmp_mask] = np.array(COLORS[i])
 
-        print(COLORS[i])
-
     return result
 
 def run():
@@ -82,10 +88,9 @@ def run():
     maze.generate(world.map)
 
     world.players = [objects.Player(i) for i in range(4)]
-    find_spawn_point((0, 0), world.players[0], world.map)
-    find_spawn_point((0, world.map.size[1] - 1), world.players[1], world.map)
-    find_spawn_point((world.map.size[0] - 1, 0), world.players[2], world.map)
-    find_spawn_point((world.map.size[0] - 1, world.map.size[1] - 1), world.players[3], world.map)
+    spawns = spawn_points(world.map)
+    for s, p in zip(spawns, world.players):
+        find_spawn_point(s, p, world.map)
     world.bombs = []
     world.explosions = []
     human = world.players[0]

@@ -60,22 +60,24 @@ def find_spawn_point(start, player, map):
                 if npos not in visited and map.is_valid(npos):
                     points.append(npos)
 
-def recolor_players(sprite, player_cnt):
-    result = [sprite.copy() for _ in range(player_cnt)]
-    for i, img in enumerate(result):
-        tmp = pygame.surfarray.pixels3d(img)
-        tmp_mask = tmp == 255
-        tmp_mask = np.logical_and(tmp_mask[:, :, 0], tmp_mask[:, :, 2])
+def recolor_player(sprite, id):
 
-        tmp[tmp_mask] = np.array(COLORS[i])
+    result = sprite.copy()
+
+    tmp = pygame.surfarray.pixels3d(result)
+    tmp_mask = tmp == 255
+    tmp_mask = np.logical_and(tmp_mask[:, :, 0], tmp_mask[:, :, 2])
+
+    tmp[tmp_mask] = np.array(COLORS[id])
 
     return result
 
 def run():
     root_dir = os.path.dirname(os.path.realpath(__file__))
+    asset_dir = os.path.join(root_dir, 'assets')
+
     stone_file = os.path.join(root_dir, 'assets/stoneblock.png')
     grass_file = os.path.join(root_dir, 'assets/grass.png')
-    player_file = os.path.join(root_dir, 'assets/player.png')
     bomb_file = os.path.join(root_dir, 'assets/bomb.png')
     explosion_file = os.path.join(root_dir, 'assets/explosion.png')
 
@@ -98,12 +100,16 @@ def run():
     human = world.players[0]
     ais = [ai.AI(p) for p in world.players[1:]]
 
+    for sname in ['stand', 'walk_up', 'walk_down', 'walk_left', 'walk_right']:
+        fname = os.path.join(asset_dir, sname + '.png')
+        sprite = pygame.image.load(fname)
+        for p in world.players:
+            p.sprites[sname] = recolor_player(sprite, p.id)
+
     # load assets
     sprites = {}
     sprites['tiles'] = [pygame.image.load(grass_file),
         pygame.image.load(stone_file)]
-    player_sprite = pygame.image.load(player_file)
-    sprites['player'] = recolor_players(player_sprite, len(world.players))
     sprites['bomb'] = pygame.image.load(bomb_file)
     sprites['explosion'] = pygame.image.load(explosion_file)
 

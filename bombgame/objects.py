@@ -76,6 +76,7 @@ class Player:
         self.drop_bomb = False
         self.bomb_count = 0
         self.max_bombs = max_bombs
+        self.sprites = {}
 
     def is_dead(self):
         return self.lifes == 0

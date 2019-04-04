@@ -13,7 +13,7 @@ def render(screen, world, sprites):
     draw_objects(screen, [obj.pos for obj in world.explosions], world.map, sprites['explosion'])
     # draw bombs
     draw_objects(screen, [obj.pos for obj in world.bombs], world.map, sprites['bomb'])
-    draw_players(screen, world.players, world.map, sprites['player'])
+    draw_players(screen, world.players, world.map)
 
     pygame.display.flip()
 
@@ -34,6 +34,15 @@ def draw_objects(screen, positions, map, sprite):
         rect = pygame.Rect(real_pos, (twidth, theight))
         screen.blit(sprite, rect)
 
-def draw_players(screen, players, map, sprites):
+def draw_players(screen, players, map):
     for p in players:
-        draw_objects(screen, [p.render_pos], map, sprites[p.id])
+        sprite = p.sprites['stand']
+        if p.move[0] > 0:
+            sprite = p.sprites['walk_right']
+        elif p.move[0] < 0:
+            sprite = p.sprites['walk_left']
+        elif p.move[1] > 0:
+            sprite = p.sprites['walk_down']
+        elif p.move[1] < 0:
+            sprite = p.sprites['walk_up']
+        draw_objects(screen, [p.render_pos], map, sprite)

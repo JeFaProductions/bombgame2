@@ -10,9 +10,9 @@ def render(screen, world, sprites):
 
     draw_tilemap(screen, world.map, sprites['tiles'])
     # draw explosions
-    draw_objects(screen, world.explosions, world.map, sprites['explosion'])
+    draw_objects(screen, [obj.pos for obj in world.explosions], world.map, sprites['explosion'])
     # draw bombs
-    draw_objects(screen, world.bombs, world.map, sprites['bomb'])
+    draw_objects(screen, [obj.pos for obj in world.bombs], world.map, sprites['bomb'])
     draw_players(screen, world.players, world.map, sprites['player'])
 
     pygame.display.flip()
@@ -27,13 +27,13 @@ def draw_tilemap(screen, map, tile_sprites):
             rect = pygame.Rect(real_pos, (twidth, theight))
             screen.blit(tile_sprites[bg], rect)
 
-def draw_objects(screen, objects, map, sprite):
+def draw_objects(screen, positions, map, sprite):
     twidth, theight = map.tileSize
-    for obj in objects:
-        real_pos = (obj.pos[0] * twidth, obj.pos[1] * theight)
+    for pos in positions:
+        real_pos = (pos[0] * twidth, pos[1] * theight)
         rect = pygame.Rect(real_pos, (twidth, theight))
         screen.blit(sprite, rect)
 
 def draw_players(screen, players, map, sprites):
     for p in players:
-        draw_objects(screen, [p], map, sprites[p.id])
+        draw_objects(screen, [p.render_pos], map, sprites[p.id])

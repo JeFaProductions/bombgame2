@@ -15,6 +15,8 @@ import numpy as np
 COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0),
     (0, 255, 255), (255, 0, 255), (255, 255, 255), (0, 0, 0)]
 
+LOGIC_INTERVAL = 100.0
+
 def process_human_input(human):
     human.move[:] = 0
     pressed = pygame.key.get_pressed()
@@ -50,7 +52,7 @@ def find_spawn_point(start, player, map):
 
         if not map.is_blocked(point):
             found = True
-            player.pos = point
+            player.pos = np.array(point, dtype=np.int)
         else:
             neighs = [(1, 0), (-1, 0), (0, 1), (0, -1)]
             for n in neighs:
@@ -108,21 +110,30 @@ def run():
     done = False
 
     clock = pygame.time.Clock()
-    timeAccount = 0
+    timeAccount = 0.0
+
     while not done:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                     done = True
 
         process_human_input(human)
-        if timeAccount >= 100:
-            timeAccount = 0
+        while timeAccount >= LOGIC_INTERVAL:
+            # update game logic
             game_logic.update(world)
-
+            # execute all ai based on updated world
             for a in ais:
                 a.update(world)
+            # reduce time account
+            timeAccount -= LOGIC_INTERVAL
 
         if screen is not None:
+            # calculate the render position for each player
+            for player in world.players:
+                diff = player.pos - player.prev_pos
+                fac = max(0.0, min(1.0, timeAccount / LOGIC_INTERVAL))
+                # move the sprite according to the amount
+                player.render_pos = player.prev_pos + fac * diff
             game_rendering.render(screen, world, sprites)
 
         timeAccount += clock.tick(60)

@@ -29,6 +29,7 @@ def place_bombs(players, bombs, map):
 
 def move_players(players, map):
     for player in players:
+        player.prev_pos = player.pos
         # calculate new player position
         new_pos = player.pos + player.move
         # check if the new player position is a valid target

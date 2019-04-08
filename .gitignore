@@ -1,4 +1,6 @@
 __pycache__/
 env/
 build/
+dist/
+bombgame2.egg-info/
 *.pyc

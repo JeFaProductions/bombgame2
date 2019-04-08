@@ -3,7 +3,7 @@
 # Author: Fabian Meyer
 # Created On: 31 Jan 2019
 
-from distutils.core import setup
+from setuptools import setup
 
 setup(name='bombgame2',
     version='0.1',
@@ -14,5 +14,8 @@ setup(name='bombgame2',
     packages=['bombgame'],
     package_data={'bombgame': ['assets/*.png']},
     ext_modules=[],
-    scripts=['bombgame2'],
-    install_requires=['numpy', 'pygame'])
+    entry_points={
+        'console_scripts': ['bombgame2=bombgame:run'],
+    },
+    install_requires=['numpy', 'pygame']
+)

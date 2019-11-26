@@ -1,14 +1,18 @@
 # recursive_bt_maze.py
 #
-#     Author: Jens Gansloser
+# Author: Jens Gansloser
 # Created On: 16 Feb 2019
 
 import os
 import random
 import numpy as np
 
+
 class RecursiveBTMaze:
     def __init__(self, width, height):
+        if width % 2 == 0 or height % 2 == 0:
+            raise ValueError("Width and height need to be odd.")
+
         self.width = width
         self.height = height
 
@@ -16,42 +20,60 @@ class RecursiveBTMaze:
                    'E': np.array([2, 0]),
                    'S': np.array([0, -2]),
                    'W': np.array([-2, 0])}
-        self.go_half = {key: (0.5 * value).astype(np.int)
-            for key, value in self.go.items()}
+        self.go_half = {key: (0.5 * value).astype(np.int) for key, value in self.go.items()}
         self.opposite = {'N': 'S', 'E': 'W', 'S': 'N', 'W': 'E'}
 
         # 0: path, 1: wall.
         self.data = np.ones((height, width), dtype=np.int)
 
-    def generate(self):
+        self.stack = []
+
         index = np.array([random.randint(0, self.height - 1),
                           random.randint(0, self.width - 1)])
+        index[index % 2 == 0] += 1
+        self.stack.append([index, self.shuffle_directions()])
 
-        self.gen(index)
+    def generate(self):
+        while self.next():
+            pass
 
-        self.random_break(index)
+    def next(self, borders=False):
+        if self.stack:
+            index, directions = self.stack.pop()
 
-    def gen(self, index):
-        end = True
+            stack_size = len(self.stack)
+            directions_size = len(directions)
 
-        for direction in self.shuffle_directions():
-            new_index = index + self.go[direction]
+            while directions:
+                direction = directions.pop()
 
-            if self.cell_valid(new_index) and not self.cell_visited(new_index):
-                self.cell_move(index, new_index)
-                self.gen(new_index)
-                end = False
+                new_index = index + self.go[direction]
 
-        # Remove dead ends.
-        if end:
-            self.random_break(index)
+                # Special case at the borders.
+                if borders:
+                    if self.cell_valid(index + self.go_half[direction]) and not self.cell_valid(new_index):
+                        if random.choice([0, 1]):
+                            y, x = index + self.go_half[direction]
+                            self.data[y, x] = 0
+
+                if self.cell_valid(new_index) and not self.cell_visited(new_index):
+                    self.stack.append([index, directions])
+                    self.cell_move(index, new_index)
+                    self.stack.append([new_index, self.shuffle_directions()])
+                    break
+
+            if directions_size == 4 and not directions and len(self.stack) == stack_size:
+                self.random_break(index)
+
+            return True
+        else:
+            return False
 
     def random_break(self, index):
         for direction in self.shuffle_directions():
             new_index = index + self.go[direction]
 
-            if self.cell_valid(new_index) and self.cell_value(
-            index + self.go_half[direction]) == 1:
+            if self.cell_valid(new_index) and self.cell_value(index + self.go_half[direction]) == 1:
                 self.cell_move(index, new_index)
                 break
 

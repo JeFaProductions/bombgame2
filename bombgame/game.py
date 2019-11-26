@@ -1,6 +1,6 @@
 # game.py
 #
-#     Author: Fabian Meyer
+# Author: Fabian Meyer
 # Created On: 01 Feb 2019
 
 import pygame
@@ -13,9 +13,10 @@ import os.path
 import numpy as np
 
 COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0),
-    (0, 255, 255), (255, 0, 255), (255, 255, 255), (0, 0, 0)]
+          (0, 255, 255), (255, 0, 255), (255, 255, 255), (0, 0, 0)]
 
 LOGIC_INTERVAL = 100.0
+
 
 def process_human_input(human):
     human.move[:] = 0
@@ -33,12 +34,14 @@ def process_human_input(human):
     if pressed[pygame.K_SPACE]:
         human.drop_bomb = True
 
+
 def spawn_points(map):
     width, height = map.size
     return [(0, 0), (width - 1, 0),
-        (0, height - 1), (width - 1, height - 1),
-        (0, int(height / 2)), (int(width / 2), 0),
-        (width - 1, int(height / 2)), (int(width / 2), height - 1)]
+            (0, height - 1), (width - 1, height - 1),
+            (0, int(height / 2)), (int(width / 2), 0),
+            (width - 1, int(height / 2)), (int(width / 2), height - 1)]
+
 
 def find_spawn_point(start, player, map):
     player.pos = np.array(start, dtype=np.int)
@@ -60,8 +63,8 @@ def find_spawn_point(start, player, map):
                 if npos not in visited and map.is_valid(npos):
                     points.append(npos)
 
-def recolor_player(sprite, id):
 
+def recolor_player(sprite, id):
     result = sprite.copy()
 
     tmp = pygame.surfarray.pixels3d(result)
@@ -71,6 +74,7 @@ def recolor_player(sprite, id):
     tmp[tmp_mask] = np.array(COLORS[id])
 
     return result
+
 
 def run():
     root_dir = os.path.dirname(os.path.realpath(__file__))
@@ -83,12 +87,16 @@ def run():
 
     pygame.init()
 
+    grid_size = (19, 19)
+    tile_size = (30, 30)
+    screen_size = (grid_size[0] * tile_size[0], grid_size[1] * tile_size[1])
+
     # create pygame window
-    screen = pygame.display.set_mode((600, 600))
+    screen = pygame.display.set_mode(screen_size)
 
     # create tile map
     world = objects.World()
-    world.map = objects.TileMap((20, 20), (30, 30))
+    world.map = objects.TileMap(grid_size, tile_size)
     maze.generate(world.map)
 
     world.players = [objects.Player(i) for i in range(4)]
@@ -109,7 +117,7 @@ def run():
     # load assets
     sprites = {}
     sprites['tiles'] = [pygame.image.load(grass_file),
-        pygame.image.load(stone_file)]
+                        pygame.image.load(stone_file)]
     sprites['bomb'] = pygame.image.load(bomb_file)
     sprites['explosion'] = pygame.image.load(explosion_file)
 
@@ -121,9 +129,10 @@ def run():
     while not done:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                    done = True
+                done = True
 
         process_human_input(human)
+
         while timeAccount >= LOGIC_INTERVAL:
             # update game logic
             game_logic.update(world)
@@ -137,7 +146,8 @@ def run():
             # calculate the render position for each player
             for player in world.players:
                 diff = player.pos - player.prev_pos
-                fac = max(0.0, min(1.0, timeAccount / LOGIC_INTERVAL))
+                fac = max(0.0, timeAccount / LOGIC_INTERVAL)
+
                 # move the sprite according to the amount
                 player.render_pos = player.prev_pos + fac * diff
             game_rendering.render(screen, world, sprites)
